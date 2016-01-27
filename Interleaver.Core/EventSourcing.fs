@@ -11,9 +11,12 @@ module EventSourcing =
 
   type EventData = { id: EventId; playerId: PlayerId; aggregateId: AggregateId }
   type Event =
-    | SomeEvent of EventData
+    | SomeSecretEvent of EventData
+    | SomePublicEvent of EventData
 
-  type Command = Unit
+  type Command =
+    | SecretAction
+    | PublicAction
   type CommandResult =
     | OK
     | KO
@@ -36,6 +39,7 @@ module EventSourcing =
       |> List.fold applyEvent Aggregate.Zero
     let event = 
       match command with
-      | _ -> SomeEvent({ id = System.Guid.NewGuid(); playerId = System.Guid.NewGuid(); aggregateId = System.Guid.NewGuid()})
+      | SecretAction -> SomeSecretEvent({ id = System.Guid.NewGuid(); playerId = System.Guid.NewGuid(); aggregateId = System.Guid.NewGuid()})
+      | PublicAction -> SomePublicEvent({ id = System.Guid.NewGuid(); playerId = System.Guid.NewGuid(); aggregateId = System.Guid.NewGuid()})
     event |> eventSaver
     OK
