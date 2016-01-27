@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Interleaver.Console", "Interleaver.Console\Interleaver.Console.fsproj", "{D5AC617B-06F1-41D3-A736-0D31B59E8097}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Interleaver.Core", "Interleaver.Core\Interleaver.Core.fsproj", "{B250E6C8-5CA4-4ACB-9871-9C64252EC474}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Interleaver.Tests", "Interleaver.Tests\Interleaver.Tests.fsproj", "{572134F3-ADB5-4753-AC42-AEA9C6BF98DE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D5AC617B-06F1-41D3-A736-0D31B59E8097}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5AC617B-06F1-41D3-A736-0D31B59E8097}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5AC617B-06F1-41D3-A736-0D31B59E8097}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5AC617B-06F1-41D3-A736-0D31B59E8097}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B250E6C8-5CA4-4ACB-9871-9C64252EC474}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B250E6C8-5CA4-4ACB-9871-9C64252EC474}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B250E6C8-5CA4-4ACB-9871-9C64252EC474}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B250E6C8-5CA4-4ACB-9871-9C64252EC474}.Release|Any CPU.Build.0 = Release|Any CPU
+		{572134F3-ADB5-4753-AC42-AEA9C6BF98DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{572134F3-ADB5-4753-AC42-AEA9C6BF98DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{572134F3-ADB5-4753-AC42-AEA9C6BF98DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{572134F3-ADB5-4753-AC42-AEA9C6BF98DE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
