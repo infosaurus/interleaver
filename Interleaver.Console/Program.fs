@@ -4,6 +4,5 @@ open Interleaver.Core.Interleave
 
 [<EntryPoint>]
 let main argv = 
-    //let value = interleave [5] [6]
-    //printfn "%d" value
+    
     0 // return an integer exit code

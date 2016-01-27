@@ -19,7 +19,7 @@ module EventSourcing =
     | KO
 
   type StreamFetcher = AggregateId -> Event list
-  type StreamSaver = Aggregate -> Unit
+  type EventSaver = Event -> Unit
 
   let applyEvent (aggregate: Aggregate) (event: Event) =
     aggregate
@@ -28,7 +28,7 @@ module EventSourcing =
     (aggregateId: AggregateId)
     (command: Command)
     (streamFetcher: StreamFetcher)
-    (streamSaver: StreamSaver) =
+    (eventSaver: EventSaver) =
 
     let eventStream = streamFetcher aggregateId
     let currentAggregateState =
@@ -37,5 +37,5 @@ module EventSourcing =
     let event = 
       match command with
       | _ -> SomeEvent({ id = System.Guid.NewGuid(); playerId = System.Guid.NewGuid(); aggregateId = System.Guid.NewGuid()})
-    applyEvent currentAggregateState event |> streamSaver
+    event |> eventSaver
     OK
