@@ -30,4 +30,5 @@ module Interleave =
       |> List.map (fun x -> x aggregateId)
     reconcile sourceStream foreignStreams fitnessFunction 
     |> streamSaver
-    OK
+    ignore
+
