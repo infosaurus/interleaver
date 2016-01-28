@@ -1,49 +1,60 @@
-﻿// Learn more about F# at http://fsharp.org
-// See the 'F# Tutorial' project for more help.
+﻿
+open System
+open System.Threading
 open Interleaver.Core.Interleave
 open Interleaver.Core.EventSourcing
-open System
 
 let mutable playerOneEvents: Event list = List.Empty
 let mutable playerTwoEvents: Event list = List.Empty
 let mutable playerThreeEvents: Event list = List.Empty
 
-let synchronizeTickMilliseconds = 10000
+let eventIntervalBracket = (500, 1000)
+let synchronizeInterval = 5 * snd(eventIntervalBracket)
+let speed = 1
 
 let aggregateId = System.Guid.NewGuid()
 
 let colorizeNumber = function
-  | x when x % 2 = 0 -> Console.ForegroundColor <- ConsoleColor.DarkBlue 
+  | x when x % 2 = 0 -> Console.ForegroundColor <- ConsoleColor.Blue 
   | x when x % 3 = 0 -> Console.ForegroundColor <- ConsoleColor.DarkRed 
   | _ -> Console.ForegroundColor <- ConsoleColor.DarkGreen
 
 let sendRandomCommand playerNumber =
 
-  let rnd = System.Random()
-  let generateCommand =  
+  let rnd = System.Random(DateTime.Now.Millisecond)
+  let generateCommand() =  
     match rnd.Next() with
-    | n when n % 2 = 0 -> PublicAction
+    | n when n % 2 = 0 || n % 3 = 0 -> PublicAction
     | _ -> SecretAction
 
-  let eventStorage = 
+  let eventStorage() = 
     match playerNumber with
-    | 1 -> (playerOneEvents, fun newEvent -> playerOneEvents <- newEvent :: playerOneEvents)
-    | 2 -> (playerTwoEvents, fun newEvent -> playerTwoEvents <- newEvent :: playerTwoEvents)
-    | 3 -> (playerThreeEvents, fun newEvent -> playerThreeEvents <- newEvent :: playerThreeEvents)
+    | 1 -> (playerOneEvents, fun newEvent -> 
+      playerOneEvents <- playerOneEvents @ [newEvent])
+    | 2 -> (playerTwoEvents, fun newEvent -> 
+      playerTwoEvents <- playerTwoEvents  @ [newEvent])
+    | 3 -> (playerThreeEvents, fun newEvent -> 
+      playerThreeEvents <- playerThreeEvents  @ [newEvent])
     | _ -> failwith "there can only be 3 players in this game"
 
-  commandHandler aggregateId generateCommand (fun _ -> fst(eventStorage)) (snd(eventStorage)) 
+  let command = generateCommand()
+  commandHandler aggregateId command (fun _ -> fst(eventStorage())) (snd(eventStorage())) 
   |> ignore
+
+  printf 
+    "%s" 
+    (match command with
+    | PublicAction -> "P"
+    | SecretAction -> "S")
 
 let playerLoop playerNumber =
   async {
-  let rnd = System.Random()
   while true do
     async  {
-      colorizeNumber playerNumber
-      printfn "player number %d sending command..." playerNumber
+      colorizeNumber playerNumber 
       sendRandomCommand playerNumber
-      do! Async.Sleep (rnd.Next(100, 1000))
+      let rnd = System.Random(DateTime.Now.Millisecond)
+      do! Async.Sleep (rnd.Next(fst(eventIntervalBracket) / speed, snd(eventIntervalBracket) / speed))
     }
     |> Async.RunSynchronously
     |> ignore
@@ -59,6 +70,7 @@ let synchronizeLoop =
       let player3Events = playerThreeEvents
 
       Console.ForegroundColor <- ConsoleColor.Gray 
+      printfn ""
       printfn "Beginning synchronization..."
       printfn "Synchronizing player1 events..."
       synchronize 
@@ -86,12 +98,40 @@ let synchronizeLoop =
         (fun events -> playerThreeEvents <- events)
         fitnessFunction
       |> ignore
+     
+      playerOneEvents
+      |> List.map
+        (function
+        | SomeSecretEvent e -> "S"
+        | SomePublicEvent e -> "P")
+      |> List.fold (+) ""
+      |> printfn "Resulting player1 interleaved stream : %s"
+
+      playerTwoEvents
+      |> List.map
+        (function
+        | SomeSecretEvent e -> "S"
+        | SomePublicEvent e -> "P")
+      |> List.fold (+) ""
+      |> printfn "Resulting player2 interleaved stream : %s"
+
+      playerThreeEvents
+      |> List.map
+        (function
+        | SomeSecretEvent e -> "S"
+        | SomePublicEvent e -> "P")
+      |> List.fold (+) ""
+      |> printfn "Resulting player3 interleaved stream : %s"
+
+      playerOneEvents <- []
+      playerTwoEvents <- []
+      playerThreeEvents <- []
 
       printfn "End of synchronization."
 
     while true do
       async {
-        do! Async.Sleep synchronizeTickMilliseconds
+        do! Async.Sleep (synchronizeInterval / speed)
         synchronizeAll 
           aggregateId 
           (function 
@@ -108,9 +148,12 @@ let main argv =
 
   [1; 2; 3]
   |> List.map playerLoop
-  |> List.append [synchronizeLoop] 
-  |> Async.Parallel     
-  |> Async.RunSynchronously 
+  |> List.append [synchronizeLoop]
+  |> List.map (fun x -> 
+    Async.OnCancel(fun () -> printfn "Cancelled !") |> ignore
+    x)
+  |> Async.Parallel
+  |> Async.RunSynchronously
   |> ignore
 
   0 // return an integer exit code
